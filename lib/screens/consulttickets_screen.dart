@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_application_1/screens/ticketdetailsrecent_screen.dart';
+import 'package:flutter_application_1/screens/alltickets_screen.dart'; // Asegúrate de que la ruta sea correcta
 
 class ConsultTicketsScreen extends StatelessWidget {
   const ConsultTicketsScreen({Key? key}) : super(key: key);
@@ -55,6 +56,7 @@ class ConsultTicketsScreen extends StatelessWidget {
                   'Boleto más recientes',
                   style: GoogleFonts.dmSerifText(
                     textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    letterSpacing: 3.0,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -75,12 +77,16 @@ class ConsultTicketsScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Lógica para consultar todos los boletos
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AllTicketsScreen()), // Redirección a AllTicketsScreen
+                  );
                 },
                 child: Text(
                   'Todos los boletos',
                   style: GoogleFonts.dmSerifText(
                     textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    letterSpacing: 3.0,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(

@@ -127,7 +127,7 @@ class MyTripsScreen extends StatelessWidget {
                       textStyle: const TextStyle(fontSize: 16),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 50),
                   ElevatedButton(
                     onPressed: () {
                       // Lógica para seguir el viaje

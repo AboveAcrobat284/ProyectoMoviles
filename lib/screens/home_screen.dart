@@ -118,9 +118,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Row(
+                  Stack(
                     children: [
-                      Expanded(
+                      Container(
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(230, 230, 250, 1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -136,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 textStyle: const TextStyle(fontSize: 14),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const Divider(color: Colors.white),
                             Text(
                               'Destino',
                               style: GoogleFonts.breeSerif(
@@ -152,16 +157,28 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      Column(
-                        children: [
-                          const SizedBox(height: 20),
-                          IconButton(
+                      Positioned(
+                        right: 10,
+                        top: 40,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
                             onPressed: () {},
                             icon: const Icon(Icons.swap_vert),
                             color: const Color.fromRGBO(147, 112, 219, 1),
                             iconSize: 30,
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -187,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset('assets/images/Logo.jpeg'),
+                    Image.asset('assets/images/Glorieta_Letras_Tonalá.jpg'),
                     const SizedBox(height: 10),
                     Text(
                       'Tonalá - Tuxtla Gutiérrez',
