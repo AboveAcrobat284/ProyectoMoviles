@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'myprofile_screen.dart';
 import 'mytrips_screen.dart'; // Importa la pantalla de mis viajes
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final String userId;
+  const HomeScreen({Key? key, required this.userId}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -12,19 +15,153 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isRoundTripSelected = true;
   int _selectedIndex = 0;
+  String origin = '¿De dónde sales?';
+  String destination = '¿A dónde quieres ir?';
+  DateTime? selectedDate;
+  TextEditingController dateController = TextEditingController();
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    if (index == 0) {
-      // Si ya estás en HomeScreen, no necesitas navegar de nuevo.
-    } else if (index == 1) {
+    if (index == 1) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const MyTripsScreen()),
+        MaterialPageRoute(builder: (context) => MyTripsScreen(userId: widget.userId)),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MyProfileScreen(userId: widget.userId)),
       );
     }
+    // Otras opciones de navegación se pueden manejar aquí
+  }
+
+  void _selectLocation(bool isOrigin) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Arriaga Chiapas'),
+              onTap: () {
+                if (isOrigin && destination == 'Arriaga Chiapas' ||
+                    !isOrigin && origin == 'Arriaga Chiapas') {
+                  _showErrorDialog(
+                      'No puedes seleccionar la misma ubicación para Origen y Destino.');
+                } else {
+                  setState(() {
+                    if (isOrigin) {
+                      origin = 'Arriaga Chiapas';
+                    } else {
+                      destination = 'Arriaga Chiapas';
+                    }
+                  });
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            ListTile(
+              title: const Text('Tonalá Chiapas'),
+              onTap: () {
+                if (isOrigin && destination == 'Tonalá Chiapas' ||
+                    !isOrigin && origin == 'Tonalá Chiapas') {
+                  _showErrorDialog(
+                      'No puedes seleccionar la misma ubicación para Origen y Destino.');
+                } else {
+                  setState(() {
+                    if (isOrigin) {
+                      origin = 'Tonalá Chiapas';
+                    } else {
+                      destination = 'Tonalá Chiapas';
+                    }
+                  });
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            ListTile(
+              title: const Text('Tuxtla Gutiérrez Chiapas'),
+              onTap: () {
+                if (isOrigin && destination == 'Tuxtla Gutiérrez Chiapas' ||
+                    !isOrigin && origin == 'Tuxtla Gutiérrez Chiapas') {
+                  _showErrorDialog(
+                      'No puedes seleccionar la misma ubicación para Origen y Destino.');
+                } else {
+                  setState(() {
+                    if (isOrigin) {
+                      origin = 'Tuxtla Gutiérrez Chiapas';
+                    } else {
+                      destination = 'Tuxtla Gutiérrez Chiapas';
+                    }
+                  });
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _swapLocations() {
+    setState(() {
+      final temp = origin;
+      origin = destination;
+      destination = temp;
+    });
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        dateController.text = DateFormat('dd MMMM yyyy').format(selectedDate!);
+      });
+    }
+  }
+
+  void _resetFields() {
+    setState(() {
+      origin = '¿De dónde sales?';
+      destination = '¿A dónde quieres ir?';
+      selectedDate = null;
+      dateController.clear();
+    });
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error', style: GoogleFonts.breeSerif()),
+        content: Text(message, style: GoogleFonts.breeSerif()),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text('OK', style: GoogleFonts.breeSerif()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    dateController.text = DateFormat('dd MMMM yyyy').format(DateTime.now());
   }
 
   @override
@@ -135,10 +272,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 textStyle: const TextStyle(fontSize: 16),
                               ),
                             ),
-                            Text(
-                              '¿De dónde sales?',
-                              style: GoogleFonts.breeSerif(
-                                textStyle: const TextStyle(fontSize: 14),
+                            GestureDetector(
+                              onTap: () => _selectLocation(true),
+                              child: Text(
+                                origin,
+                                style: GoogleFonts.breeSerif(
+                                  textStyle: const TextStyle(fontSize: 14),
+                                ),
                               ),
                             ),
                             const Divider(color: Colors.white),
@@ -148,12 +288,61 @@ class _HomeScreenState extends State<HomeScreen> {
                                 textStyle: const TextStyle(fontSize: 16),
                               ),
                             ),
-                            Text(
-                              '¿A dónde quieres ir?',
-                              style: GoogleFonts.breeSerif(
-                                textStyle: const TextStyle(fontSize: 14),
+                            GestureDetector(
+                              onTap: () => _selectLocation(false),
+                              child: Text(
+                                destination,
+                                style: GoogleFonts.breeSerif(
+                                  textStyle: const TextStyle(fontSize: 14),
+                                ),
                               ),
                             ),
+                            const SizedBox(height: 20),
+                            if (origin != '¿De dónde sales?' && destination != '¿A dónde quieres ir?') ...[
+                              TextField(
+                                controller: dateController,
+                                readOnly: true,
+                                onTap: () => _selectDate(context),
+                                decoration: InputDecoration(
+                                  labelText: 'Salida',
+                                  labelStyle: GoogleFonts.breeSerif(
+                                    textStyle: const TextStyle(fontSize: 14),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  suffixIcon: const Icon(Icons.calendar_today),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: _resetFields,
+                                child: Text('Limpiar búsqueda', style: GoogleFonts.breeSerif()),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromRGBO(147, 112, 219, 1),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  minimumSize: const Size.fromHeight(50), // Botón ancho
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  // De momento no hace nada
+                                },
+                                child: Text('Buscar viaje', style: GoogleFonts.breeSerif()),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromRGBO(147, 112, 219, 1), // Color morado
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  minimumSize: const Size.fromHeight(50), // Botón ancho
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -173,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: _swapLocations,
                             icon: const Icon(Icons.swap_vert),
                             color: const Color.fromRGBO(147, 112, 219, 1),
                             iconSize: 30,

@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   google_fonts: ^5.0.0
   cupertino_icons: ^1.0.6
+  intl: ^0.17.0
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:

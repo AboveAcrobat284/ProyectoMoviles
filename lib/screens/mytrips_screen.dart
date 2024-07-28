@@ -1,12 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/consulttickets_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'consulttickets_screen.dart'; // Importa la pantalla de consulta de boletos
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../screens/Requestedticketdetails.dart'; // Importa la pantalla de detalles del boleto solicitado
 
 class MyTripsScreen extends StatelessWidget {
-  const MyTripsScreen({Key? key}) : super(key: key);
+  final String userId;
+
+  const MyTripsScreen({Key? key, required this.userId}) : super(key: key);
+
+  Future<void> _buscarBoleto(BuildContext context, String numCorrida) async {
+    final url = Uri.parse('http://18.204.120.248:3010/boleto/get'); // Endpoint para obtener todos los boletos
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        final boleto = data.firstWhere(
+          (element) => element['numCorrida'].toString() == numCorrida,
+          orElse: () => null,
+        );
+
+        if (boleto != null) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text('Éxito', style: GoogleFonts.modernAntiqua()),
+              content: Text('Viaje encontrado correctamente.', style: GoogleFonts.modernAntiqua()),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RequestedTicketDetails(ticketDetails: boleto)),
+                    );
+                  },
+                  child: Text('OK', style: GoogleFonts.modernAntiqua()),
+                ),
+              ],
+            ),
+          );
+        } else {
+          _showErrorDialog(context, 'Boleto no encontrado.');
+        }
+      } else {
+        _showErrorDialog(context, 'Error al buscar boleto. Código de error: ${response.statusCode}. Respuesta: ${response.body}');
+      }
+    } catch (error) {
+      _showErrorDialog(context, 'Error al buscar boleto. Detalles del error: $error');
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error', style: GoogleFonts.modernAntiqua()),
+        content: Text(message, style: GoogleFonts.modernAntiqua()),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text('OK', style: GoogleFonts.modernAntiqua()),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController numCorridaController = TextEditingController();
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(150.0),
@@ -44,31 +113,14 @@ class MyTripsScreen extends StatelessWidget {
           children: <Widget>[
             const SizedBox(height: 20),
             Text(
-              'Código de boleto',
+              'Número de corrida',
               style: GoogleFonts.dmSerifText(
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: '',
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color.fromRGBO(147, 112, 219, 1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color.fromRGBO(147, 112, 219, 1)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Correo Electrónico',
-              style: GoogleFonts.dmSerifText(
-                textStyle: const TextStyle(fontSize: 18),
-              ),
-            ),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: numCorridaController,
+              decoration: const InputDecoration(
                 hintText: '',
                 border: OutlineInputBorder(
                   borderSide: BorderSide(color: Color.fromRGBO(147, 112, 219, 1)),
@@ -81,7 +133,7 @@ class MyTripsScreen extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                // Lógica para continuar
+                _buscarBoleto(context, numCorridaController.text);
               },
               child: Text(
                 'Continuar',

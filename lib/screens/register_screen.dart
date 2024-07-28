@@ -1,9 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'login_screen.dart'; // Asegúrate de importar la pantalla de login
 
 class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  RegisterScreen({Key? key}) : super(key: key);
+
+  final TextEditingController nombreController = TextEditingController();
+  final TextEditingController apellidoController = TextEditingController();
+  final TextEditingController correoController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> _register(BuildContext context) async {
+    final String nombre = nombreController.text;
+    final String apellido = apellidoController.text;
+    final String correo = correoController.text;
+    final String password = passwordController.text;
+
+    if (nombre.isEmpty || apellido.isEmpty || correo.isEmpty || password.isEmpty) {
+      _showErrorDialog(context, 'Todos los campos son obligatorios.');
+      return;
+    }
+
+    final url = Uri.parse('http://18.204.120.248:3010/user/crear');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nombre': nombre,
+          'apellido': apellido,
+          'correo': correo,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _showSuccessDialog(context);
+      } else {
+        _showErrorDialog(context, 'Error al registrar. Inténtalo de nuevo. Código de error: ${response.statusCode}. Respuesta: ${response.body}');
+      }
+    } catch (error) {
+      _showErrorDialog(context, 'Error al registrar. Inténtalo de nuevo. Detalles del error: $error');
+    }
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Éxito', style: GoogleFonts.modernAntiqua()),
+        content: Text('Registro realizado correctamente.', style: GoogleFonts.modernAntiqua()),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.push(
+                ctx,
+                MaterialPageRoute(builder: (ctx) => LoginScreen()),
+              );
+            },
+            child: Text('OK', style: GoogleFonts.modernAntiqua()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error', style: GoogleFonts.modernAntiqua()),
+        content: Text(message, style: GoogleFonts.modernAntiqua()),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text('OK', style: GoogleFonts.modernAntiqua()),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +142,9 @@ class RegisterScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 16),
               ),
             ),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: nombreController,
+              decoration: const InputDecoration(
                 hintText: 'Nombre(s)',
                 border: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(
@@ -77,8 +159,9 @@ class RegisterScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 16),
               ),
             ),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: apellidoController,
+              decoration: const InputDecoration(
                 hintText: 'Apellido(s)',
                 border: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(
@@ -93,8 +176,9 @@ class RegisterScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 16),
               ),
             ),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: correoController,
+              decoration: const InputDecoration(
                 hintText: 'ejemplo@correo.com',
                 border: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(
@@ -109,9 +193,10 @@ class RegisterScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 16),
               ),
             ),
-            const TextField(
+            TextField(
+              controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Contraseña',
                 border: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(
@@ -121,12 +206,7 @@ class RegisterScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              },
+              onPressed: () => _register(context),
               child: Text(
                 'REGISTRAR',
                 style: GoogleFonts.inter(
@@ -159,7 +239,7 @@ class RegisterScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
                     );
                   },
                   child: Text(
